@@ -14,11 +14,13 @@ public class Spawner : MonoBehaviour
     public float m_fConveyorBeltSpeed;
 
     private List<GameObject> m_SpawnedObjects = new List<GameObject>();
+    //private List<GameObject> m_ObjectsOnConveyor = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        //EventManager.StartListening("TimesUp", ClearObjects);
+        EventManager.StartListening("ResetGame", ClearObjects);
     }
 
     // Update is called once per frame

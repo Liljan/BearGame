@@ -44,14 +44,14 @@ public class GameManager : MonoBehaviour
     {
         EventManager.StartListening("GameOver", GotoGameOverState);
 
-
         GotoPreGameState();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown("1"))
+            Spawn();
     }
 
     public void ResetGame()
@@ -89,15 +89,8 @@ public class GameManager : MonoBehaviour
         GotoGameplayState();
     }
 
-    public void StartGame()
+    public void Spawn()
     {
-        Debug.Log("The game has started");
         m_Spawner.SpawnObjects();
-    }
-
-    public void EndGame()
-    {
-        Debug.Log("The game has ended");
-        m_Spawner.ClearObjects();
     }
 }
