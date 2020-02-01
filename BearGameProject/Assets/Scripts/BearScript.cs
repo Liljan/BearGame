@@ -39,6 +39,56 @@ public class BearScript : MonoBehaviour
         }
     }
 
+    bool IsBearCompleted()
+    {
+        return Head.activeSelf && LeftArm.activeSelf && RightArm.activeSelf && LeftLeg.activeSelf && RightLeg.activeSelf;
+    }
+
+    bool TryAddArm()
+    {
+        if(!RightArm.activeSelf)
+        {
+            RightArm.SetActive(true);
+            return true;
+        }
+        
+        if(!LeftArm.activeSelf)
+        {
+            LeftArm.SetActive(true);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool TryAddLeg()
+    {
+        if (!LeftLeg.activeSelf)
+        {
+            LeftLeg.SetActive(true);
+            return true;
+        }
+
+        if (!RightLeg.activeSelf)
+        {
+            RightLeg.SetActive(true);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool TryAddHead()
+    {
+        if (!Head.activeSelf)
+        {
+            Head.SetActive(true);
+            return true;
+        }
+
+        return false;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
