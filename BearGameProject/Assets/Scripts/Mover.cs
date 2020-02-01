@@ -17,14 +17,15 @@ public class Mover : MonoBehaviour
     private bool m_IsMovingOnBelt = false;
     private bool m_HasReachedEnd = false;
 
-    public float fallPushForce = 500.0f;
+    [SerializeField]
+    private float fallPushForce = 500.0f;
 
+    [SerializeField]
     private Rigidbody m_RigidBody;
 
     // Start is called before the first frame update
     void Start()
     {
-        m_RigidBody = GetComponent<Rigidbody>();
         Debug.Assert(m_RigidBody, "No rigidbody attatched to the spawn object");
         m_RigidBody.useGravity = false;
     }

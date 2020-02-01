@@ -32,7 +32,7 @@ public class Spawner : MonoBehaviour
         GameObject spawnedObj = Instantiate(m_ObjectToSpawn, m_StartPoint.position, m_StartPoint.rotation);
         m_SpawnedObjects.Add(spawnedObj);
 
-        Mover mover = spawnedObj.GetComponent<Mover>();
+        Mover mover = spawnedObj.GetComponentInChildren<Mover>();
 
         Debug.Assert(mover, "The spawned object has no Mover script");
         mover.SetStartPoint(m_StartPoint);
@@ -40,6 +40,8 @@ public class Spawner : MonoBehaviour
         mover.SetEndPoint(m_EndPoint);
 
         mover.StartFalling();
+
+        EventManager.TriggerEvent("BearSpawn");
     }
 
 
