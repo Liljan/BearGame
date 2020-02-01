@@ -32,14 +32,14 @@ Material:
     - _AlphaDstBlend: 0
     - _AlphaSrcBlend: 1
     - _BlendMode: 0
-    - _Bright: 0.85
+    - _Bright: 0.752
     - _CullMode: 2
     - _CullModeForward: 2
-    - _Dark: 0.57
+    - _Dark: 0.137
     - _DoubleSidedEnable: 0
     - _DoubleSidedNormalMode: 2
     - _DstBlend: 0
-    - _Metalac: 0
+    - _Metalac: 1
     - _ReceivesSSR: 1
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
@@ -55,6 +55,7 @@ Material:
     - _StencilWriteMaskGBuffer: 51
     - _StencilWriteMaskMV: 176
     - _SurfaceType: 0
+    - _Tiling: 34.1
     - _TransparentBackfaceEnable: 0
     - _TransparentCullMode: 2
     - _TransparentSortPriority: 0
@@ -64,6 +65,6 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.17911176, g: 0.18235813, b: 0.21698111, a: 0}
+    - _Color: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
