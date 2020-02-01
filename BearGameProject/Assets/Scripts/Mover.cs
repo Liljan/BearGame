@@ -17,10 +17,16 @@ public class Mover : MonoBehaviour
     private bool m_IsMovingOnBelt = false;
     private bool m_HasReachedEnd = false;
 
+    public float fallPushForce = 500.0f;
+
+    private Rigidbody m_RigidBody;
+
     // Start is called before the first frame update
     void Start()
     {
-       
+        m_RigidBody = GetComponent<Rigidbody>();
+        Debug.Assert(m_RigidBody, "No rigidbody attatched to the spawn object");
+        m_RigidBody.useGravity = false;
     }
 
     // Update is called once per frame
@@ -68,10 +74,13 @@ public class Mover : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, m_EndPoint.position, distance);
 
         // Check if the position of the cube and sphere are approximately equal.
-        if (Vector3.Distance(transform.position, m_EndPoint.position) < 0.001f)
+        if(Vector3.Distance(transform.position, m_EndPoint.position) < 0.001f)
         {
             // Swap the position of the cylinder.
             m_IsMovingOnBelt = false;
+            m_RigidBody.useGravity = true;
+
+            m_RigidBody.AddRelativeForce(transform.forward * fallPushForce);
         }
     }
 
