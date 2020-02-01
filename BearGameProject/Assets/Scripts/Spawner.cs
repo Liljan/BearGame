@@ -7,7 +7,7 @@ public class Spawner : MonoBehaviour
     public GameObject m_ObjectToSpawn;
     public Transform m_SpawnLocation;
 
-    private List<GameObject> m_SpawnedObjects;
+    private List<GameObject> m_SpawnedObjects = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -21,14 +21,21 @@ public class Spawner : MonoBehaviour
         
     }
 
-    public void SpawnObject()
+    public void SpawnObjects()
     {
-
+        GameObject spawnedObj = Instantiate(m_ObjectToSpawn, m_SpawnLocation.position, m_SpawnLocation.rotation);
+        m_SpawnedObjects.Add(spawnedObj);
     }
 
 
-    public void Reset()
+    public void ClearObjects()
     {
+        foreach(GameObject gameObject in m_SpawnedObjects)
+        {
+            Destroy(gameObject);
+        }
+
+        // Use the garbage collection
         m_SpawnedObjects.Clear();
     }
     
