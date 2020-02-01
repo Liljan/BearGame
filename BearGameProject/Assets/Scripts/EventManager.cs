@@ -66,4 +66,5 @@ public class EventManager : MonoBehaviour
         if(Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
             thisEvent.Invoke();
     }
+
 }
