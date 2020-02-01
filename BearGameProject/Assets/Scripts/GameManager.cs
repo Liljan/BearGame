@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public Spawner m_Spawner;
+
     private static GameManager sm_GameManager;
 
     public static GameManager Instance
@@ -46,10 +48,12 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         Debug.Log("The game has started");
+        m_Spawner.SpawnObjects();
     }
 
     public void EndGame()
     {
         Debug.Log("The game has ended");
+        m_Spawner.ClearObjects();
     }
 }

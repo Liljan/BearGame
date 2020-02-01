@@ -44,14 +44,16 @@ Material:
     - _AlphaDstBlend: 0
     - _AlphaSrcBlend: 1
     - _BlendMode: 0
-    - _Bright: 0.45
+    - _Bright: 0.68
     - _CullMode: 2
     - _CullModeForward: 2
     - _Dark: 0.83
     - _DoubleSidedEnable: 0
     - _DoubleSidedNormalMode: 2
     - _DstBlend: 0
+    - _MainTilier: 0
     - _Metalac: 1
+    - _Metalic: 0
     - _ReceivesSSR: 1
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
@@ -71,11 +73,13 @@ Material:
     - _TransparentCullMode: 2
     - _TransparentSortPriority: 0
     - _UseShadowThreshold: 0
+    - _XTIling: 0.29
+    - _YTIling: 0.58
     - _ZTestDepthEqualForOpaque: 3
     - _ZTestGBuffer: 4
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.5492168, g: 0.5590068, b: 0.6226415, a: 0}
+    - _Color: {r: 0.28355286, g: 0.29240596, b: 0.33962262, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
