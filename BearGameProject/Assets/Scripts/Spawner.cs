@@ -5,7 +5,13 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     public GameObject m_ObjectToSpawn;
-    public Transform m_SpawnLocation;
+
+    public Transform m_StartPoint;
+    public Transform m_DropPoint;
+    public Transform m_EndPoint;
+
+    public float m_fFallSpeed;
+    public float m_fConveyorBeltSpeed;
 
     private List<GameObject> m_SpawnedObjects = new List<GameObject>();
 
@@ -23,8 +29,17 @@ public class Spawner : MonoBehaviour
 
     public void SpawnObjects()
     {
-        GameObject spawnedObj = Instantiate(m_ObjectToSpawn, m_SpawnLocation.position, m_SpawnLocation.rotation);
+        GameObject spawnedObj = Instantiate(m_ObjectToSpawn, m_StartPoint.position, m_StartPoint.rotation);
         m_SpawnedObjects.Add(spawnedObj);
+
+        Mover mover = spawnedObj.GetComponent<Mover>();
+
+        Debug.Assert(mover, "The spawned object has no Mover script");
+        mover.SetStartPoint(m_StartPoint);
+        mover.SetDropPoint(m_DropPoint);
+        mover.SetEndPoint(m_EndPoint);
+
+        mover.StartFalling();
     }
 
 
@@ -38,5 +53,5 @@ public class Spawner : MonoBehaviour
         // Use the garbage collection
         m_SpawnedObjects.Clear();
     }
-    
+
 }
