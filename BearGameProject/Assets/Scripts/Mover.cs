@@ -18,7 +18,7 @@ public class Mover : MonoBehaviour
     private bool m_HasReachedEnd = false;
 
     [SerializeField]
-    private float fallPushForce = 500.0f;
+    private float m_PushMultiplier = 100.0f;
 
     [SerializeField]
     private Rigidbody m_RigidBody;
@@ -64,7 +64,7 @@ public class Mover : MonoBehaviour
         {
             // Swap the position of the cylinder.
             m_IsFalling = false;
-            m_IsMovingOnBelt = true;  
+            m_IsMovingOnBelt = true;
         }
     }
 
@@ -80,8 +80,7 @@ public class Mover : MonoBehaviour
             // Swap the position of the cylinder.
             m_IsMovingOnBelt = false;
             m_RigidBody.useGravity = true;
-
-            m_RigidBody.AddRelativeForce(transform.forward * fallPushForce);
+            m_RigidBody.AddRelativeForce(transform.forward * m_ConveyorBeltSpeed * m_PushMultiplier);
         }
     }
 

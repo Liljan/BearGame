@@ -60,8 +60,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_FallSpeed: 10
-  m_ConveyorBeltSpeed: 10
-  fallPushForce: 300
+  m_ConveyorBeltSpeed: 2
+  m_PushMultiplier: 50
   m_RigidBody: {fileID: 2700895961980954981}
 --- !u!1 &7752689767802361543
 GameObject:
