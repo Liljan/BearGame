@@ -1,19 +1,24 @@
 // Made with Amplify Shader Editor
 // Available at the Unity Asset Store - http://u3d.as/y3X 
-Shader "JMD_TexturedStandradShader"
+Shader "JMD_BearShader"
 {
 	Properties
 	{
 		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
-		_SecondaryColor("SecondaryColor", Color) = (0,0,0,0)
 		_Metalic("Metalic", Range( 0 , 1)) = 0
 		_Bright("Bright", Range( 0 , 1)) = 0.85
 		_Dark("Dark", Range( 0 , 1)) = 0.6370589
 		_Color("Color", Color) = (0,0,0,0)
+		_Color2("Color2", Color) = (0.3867925,0.1437147,0.1039961,0)
 		_Texture0("Texture 0", 2D) = "white" {}
-		_T_Bear_M("T_Bear_M", 2D) = "white" {}
-		[HideInInspector] _texcoord( "", 2D ) = "white" {}
+		_XTIling("XTIling", Range( 0 , 1)) = 1
+		_YTIling("YTIling", Range( 0 , 1)) = 1
+		_MainTilier("MainTilier", Float) = 0
+		_Bias("Bias", Float) = 0
+		_FresnelColor("FresnelColor", Color) = (0.7075472,0.6841848,0.6841848,0)
+		_Scale("Scale", Float) = 1
+		_Power("Power", Float) = 2
 
 		[HideInInspector] _RenderQueueType("Render Queue Type", Float) = 1
 		[HideInInspector] _StencilRef("Stencil Ref", Int) = 0
@@ -223,8 +228,9 @@ Shader "JMD_TexturedStandradShader"
 			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitDecalData.hlsl"
 			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl"
 
-			#define ASE_NEEDS_FRAG_RELATIVE_WORLD_POS
+			#define ASE_NEEDS_FRAG_WORLD_VIEW_DIR
 			#define ASE_NEEDS_FRAG_WORLD_NORMAL
+			#define ASE_NEEDS_FRAG_RELATIVE_WORLD_POS
 
 
 			#if defined(_DOUBLESIDED_ON) && !defined(ASE_NEED_CULLFACE)
@@ -238,7 +244,7 @@ Shader "JMD_TexturedStandradShader"
 				float4 tangentOS : TANGENT;
 				float4 uv1 : TEXCOORD1;
 				float4 uv2 : TEXCOORD2;
-				float4 ase_texcoord : TEXCOORD0;
+				
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -251,7 +257,6 @@ Shader "JMD_TexturedStandradShader"
 				float4 interp03 : TEXCOORD3;
 				float4 interp04 : TEXCOORD4;
 				float4 ase_texcoord5 : TEXCOORD5;
-				float4 ase_texcoord6 : TEXCOORD6;
 				float3 ase_normal : NORMAL;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
@@ -261,9 +266,15 @@ Shader "JMD_TexturedStandradShader"
 			};
 
 			CBUFFER_START( UnityPerMaterial )
-			float4 _SecondaryColor;
+			float _Bias;
+			float _Scale;
+			float _Power;
+			float4 _FresnelColor;
+			float _XTIling;
+			float _YTIling;
+			float _MainTilier;
+			float4 _Color2;
 			float4 _Color;
-			float4 _T_Bear_M_ST;
 			float _Metalic;
 			float _Bright;
 			float _Dark;
@@ -303,7 +314,6 @@ Shader "JMD_TexturedStandradShader"
 			float _DoubleSidedNormalMode;
 			float4 _DoubleSidedConstants;
 			CBUFFER_END
-			sampler2D _T_Bear_M;
 			sampler2D _Texture0;
 
 
@@ -504,12 +514,8 @@ Shader "JMD_TexturedStandradShader"
 				UNITY_SETUP_INSTANCE_ID(inputMesh);
 				UNITY_TRANSFER_INSTANCE_ID(inputMesh, outputPackedVaryingsMeshToPS);
 
-				outputPackedVaryingsMeshToPS.ase_texcoord5.xy = inputMesh.ase_texcoord.xy;
-				outputPackedVaryingsMeshToPS.ase_texcoord6 = float4(inputMesh.positionOS,1);
+				outputPackedVaryingsMeshToPS.ase_texcoord5 = float4(inputMesh.positionOS,1);
 				outputPackedVaryingsMeshToPS.ase_normal = inputMesh.normalOS;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				outputPackedVaryingsMeshToPS.ase_texcoord5.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				float3 defaultVertexValue = inputMesh.positionOS.xyz;
@@ -579,28 +585,28 @@ Shader "JMD_TexturedStandradShader"
 				BuiltinData builtinData;
 
 				GlobalSurfaceDescription surfaceDescription = (GlobalSurfaceDescription)0;
-				float2 uv_T_Bear_M = packedInput.ase_texcoord5.xy * _T_Bear_M_ST.xy + _T_Bear_M_ST.zw;
-				float4 tex2DNode34 = tex2D( _T_Bear_M, uv_T_Bear_M );
-				float4 lerpResult35 = lerp( _SecondaryColor , _Color , tex2DNode34.r);
-				
-				float temp_output_39_0 = ( 1.0 - tex2DNode34.r );
-				
+				float fresnelNdotV40 = dot( normalWS, normalizedWorldViewDir );
+				float fresnelNode40 = ( _Bias + _Scale * pow( 1.0 - fresnelNdotV40, _Power ) );
+				float2 appendResult37 = (float2(_XTIling , _YTIling));
 				float3 ase_worldPos = GetAbsolutePositionWS( positionRWS );
-				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, float2( 1,1 ), 1.0, 0 );
-				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.x);
+				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, ( appendResult37 + _MainTilier ), 1.0, 0 );
+				float4 lerpResult53 = lerp( _Color2 , _Color , triplanar31.y);
+				float4 clampResult43 = clamp( ( ( fresnelNode40 * _FresnelColor * triplanar31.x ) + lerpResult53 ) , float4( 0,0,0,0 ) , float4( 1,1,1,0 ) );
 				
-				surfaceDescription.Albedo = lerpResult35.rgb;
+				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.y);
+				
+				surfaceDescription.Albedo = clampResult43.rgb;
 				surfaceDescription.Normal = float3( 0, 0, 1 );
 				surfaceDescription.BentNormal = float3( 0, 0, 1 );
 				surfaceDescription.CoatMask = 0;
-				surfaceDescription.Metallic = ( _Metalic * temp_output_39_0 );
+				surfaceDescription.Metallic = _Metalic;
 
 				#ifdef _MATERIAL_FEATURE_SPECULAR_COLOR
 				surfaceDescription.Specular = 0;
 				#endif
 
 				surfaceDescription.Emission = 0;
-				surfaceDescription.Smoothness = ( lerpResult14 * temp_output_39_0 );
+				surfaceDescription.Smoothness = lerpResult14;
 				surfaceDescription.Occlusion = 1;
 				surfaceDescription.Alpha = 1;
 
@@ -769,7 +775,6 @@ Shader "JMD_TexturedStandradShader"
 				float4 ase_texcoord : TEXCOORD0;
 				float4 ase_texcoord1 : TEXCOORD1;
 				float4 ase_texcoord2 : TEXCOORD2;
-				float4 ase_texcoord3 : TEXCOORD3;
 				float3 ase_normal : NORMAL;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				#if defined(SHADER_STAGE_FRAGMENT) && defined(ASE_NEED_CULLFACE)
@@ -778,9 +783,15 @@ Shader "JMD_TexturedStandradShader"
 			};
 
 			CBUFFER_START( UnityPerMaterial )
-			float4 _SecondaryColor;
+			float _Bias;
+			float _Scale;
+			float _Power;
+			float4 _FresnelColor;
+			float _XTIling;
+			float _YTIling;
+			float _MainTilier;
+			float4 _Color2;
 			float4 _Color;
-			float4 _T_Bear_M_ST;
 			float _Metalic;
 			float _Bright;
 			float _Dark;
@@ -820,7 +831,6 @@ Shader "JMD_TexturedStandradShader"
 			float _DoubleSidedNormalMode;
 			float4 _DoubleSidedConstants;
 			CBUFFER_END
-			sampler2D _T_Bear_M;
 			sampler2D _Texture0;
 
 
@@ -1014,18 +1024,16 @@ Shader "JMD_TexturedStandradShader"
 				UNITY_TRANSFER_INSTANCE_ID(inputMesh, outputPackedVaryingsMeshToPS);
 
 				float3 ase_worldPos = GetAbsolutePositionWS( TransformObjectToWorld( (inputMesh.positionOS).xyz ) );
-				outputPackedVaryingsMeshToPS.ase_texcoord1.xyz = ase_worldPos;
+				outputPackedVaryingsMeshToPS.ase_texcoord.xyz = ase_worldPos;
 				float3 ase_worldNormal = TransformObjectToWorldNormal(inputMesh.normalOS);
-				outputPackedVaryingsMeshToPS.ase_texcoord2.xyz = ase_worldNormal;
+				outputPackedVaryingsMeshToPS.ase_texcoord1.xyz = ase_worldNormal;
 				
-				outputPackedVaryingsMeshToPS.ase_texcoord.xy = inputMesh.uv0.xy;
-				outputPackedVaryingsMeshToPS.ase_texcoord3 = float4(inputMesh.positionOS,1);
+				outputPackedVaryingsMeshToPS.ase_texcoord2 = float4(inputMesh.positionOS,1);
 				outputPackedVaryingsMeshToPS.ase_normal = inputMesh.normalOS;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				outputPackedVaryingsMeshToPS.ase_texcoord.zw = 0;
+				outputPackedVaryingsMeshToPS.ase_texcoord.w = 0;
 				outputPackedVaryingsMeshToPS.ase_texcoord1.w = 0;
-				outputPackedVaryingsMeshToPS.ase_texcoord2.w = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				float3 defaultVertexValue = inputMesh.positionOS.xyz;
@@ -1081,29 +1089,31 @@ Shader "JMD_TexturedStandradShader"
 				SurfaceData surfaceData;
 				BuiltinData builtinData;
 				GlobalSurfaceDescription surfaceDescription = (GlobalSurfaceDescription)0;
-				float2 uv_T_Bear_M = packedInput.ase_texcoord.xy * _T_Bear_M_ST.xy + _T_Bear_M_ST.zw;
-				float4 tex2DNode34 = tex2D( _T_Bear_M, uv_T_Bear_M );
-				float4 lerpResult35 = lerp( _SecondaryColor , _Color , tex2DNode34.r);
+				float3 ase_worldPos = packedInput.ase_texcoord.xyz;
+				float3 ase_worldViewDir = ( _WorldSpaceCameraPos.xyz - ase_worldPos );
+				ase_worldViewDir = normalize(ase_worldViewDir);
+				float3 ase_worldNormal = packedInput.ase_texcoord1.xyz;
+				float fresnelNdotV40 = dot( ase_worldNormal, ase_worldViewDir );
+				float fresnelNode40 = ( _Bias + _Scale * pow( 1.0 - fresnelNdotV40, _Power ) );
+				float2 appendResult37 = (float2(_XTIling , _YTIling));
+				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, ( appendResult37 + _MainTilier ), 1.0, 0 );
+				float4 lerpResult53 = lerp( _Color2 , _Color , triplanar31.y);
+				float4 clampResult43 = clamp( ( ( fresnelNode40 * _FresnelColor * triplanar31.x ) + lerpResult53 ) , float4( 0,0,0,0 ) , float4( 1,1,1,0 ) );
 				
-				float temp_output_39_0 = ( 1.0 - tex2DNode34.r );
+				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.y);
 				
-				float3 ase_worldPos = packedInput.ase_texcoord1.xyz;
-				float3 ase_worldNormal = packedInput.ase_texcoord2.xyz;
-				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, float2( 1,1 ), 1.0, 0 );
-				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.x);
-				
-				surfaceDescription.Albedo = lerpResult35.rgb;
+				surfaceDescription.Albedo = clampResult43.rgb;
 				surfaceDescription.Normal = float3( 0, 0, 1 );
 				surfaceDescription.BentNormal = float3( 0, 0, 1 );
 				surfaceDescription.CoatMask = 0;
-				surfaceDescription.Metallic = ( _Metalic * temp_output_39_0 );
+				surfaceDescription.Metallic = _Metalic;
 
 				#ifdef _MATERIAL_FEATURE_SPECULAR_COLOR
 				surfaceDescription.Specular = 0;
 				#endif
 
 				surfaceDescription.Emission = 0;
-				surfaceDescription.Smoothness = ( lerpResult14 * temp_output_39_0 );
+				surfaceDescription.Smoothness = lerpResult14;
 				surfaceDescription.Occlusion = 1;
 				surfaceDescription.Alpha = 1;
 
@@ -1255,9 +1265,15 @@ Shader "JMD_TexturedStandradShader"
 			};
 
 			CBUFFER_START( UnityPerMaterial )
-			float4 _SecondaryColor;
+			float _Bias;
+			float _Scale;
+			float _Power;
+			float4 _FresnelColor;
+			float _XTIling;
+			float _YTIling;
+			float _MainTilier;
+			float4 _Color2;
 			float4 _Color;
-			float4 _T_Bear_M_ST;
 			float _Metalic;
 			float _Bright;
 			float _Dark;
@@ -1619,9 +1635,15 @@ Shader "JMD_TexturedStandradShader"
 			};
 
 			CBUFFER_START( UnityPerMaterial )
-			float4 _SecondaryColor;
+			float _Bias;
+			float _Scale;
+			float _Power;
+			float4 _FresnelColor;
+			float _XTIling;
+			float _YTIling;
+			float _MainTilier;
+			float4 _Color2;
 			float4 _Color;
-			float4 _T_Bear_M_ST;
 			float _Metalic;
 			float _Bright;
 			float _Dark;
@@ -2017,9 +2039,15 @@ Shader "JMD_TexturedStandradShader"
 			};
 
 			CBUFFER_START( UnityPerMaterial )
-			float4 _SecondaryColor;
+			float _Bias;
+			float _Scale;
+			float _Power;
+			float4 _FresnelColor;
+			float _XTIling;
+			float _YTIling;
+			float _MainTilier;
+			float4 _Color2;
 			float4 _Color;
-			float4 _T_Bear_M_ST;
 			float _Metalic;
 			float _Bright;
 			float _Dark;
@@ -2060,7 +2088,6 @@ Shader "JMD_TexturedStandradShader"
 			float4 _DoubleSidedConstants;
 			CBUFFER_END
 			sampler2D _Texture0;
-			sampler2D _T_Bear_M;
 
 
 			inline float4 TriplanarSamplingSF( sampler2D topTexMap, float3 worldPos, float3 worldNormal, float falloff, float2 tiling, float3 normalScale, float3 index )
@@ -2288,14 +2315,12 @@ Shader "JMD_TexturedStandradShader"
 				SurfaceData surfaceData;
 				BuiltinData builtinData;
 				SmoothSurfaceDescription surfaceDescription = (SmoothSurfaceDescription)0;
+				float2 appendResult37 = (float2(_XTIling , _YTIling));
 				float3 ase_worldPos = GetAbsolutePositionWS( positionRWS );
-				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, float2( 1,1 ), 1.0, 0 );
-				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.x);
-				float2 uv_T_Bear_M = packedInput.interp03.xy * _T_Bear_M_ST.xy + _T_Bear_M_ST.zw;
-				float4 tex2DNode34 = tex2D( _T_Bear_M, uv_T_Bear_M );
-				float temp_output_39_0 = ( 1.0 - tex2DNode34.r );
+				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, ( appendResult37 + _MainTilier ), 1.0, 0 );
+				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.y);
 				
-				surfaceDescription.Smoothness = ( lerpResult14 * temp_output_39_0 );
+				surfaceDescription.Smoothness = lerpResult14;
 				surfaceDescription.Alpha = 1;
 
 				#ifdef _ALPHATEST_ON
@@ -2408,7 +2433,7 @@ Shader "JMD_TexturedStandradShader"
 			{
 				float3 positionOS : POSITION;
 				float3 normalOS : NORMAL;
-				float4 ase_texcoord : TEXCOORD0;
+				
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -2447,15 +2472,20 @@ Shader "JMD_TexturedStandradShader"
 				float4 ase_texcoord4 : TEXCOORD4;
 				float4 ase_texcoord5 : TEXCOORD5;
 				float3 ase_normal : NORMAL;
-				float4 ase_texcoord6 : TEXCOORD6;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			CBUFFER_START( UnityPerMaterial )
-			float4 _SecondaryColor;
+			float _Bias;
+			float _Scale;
+			float _Power;
+			float4 _FresnelColor;
+			float _XTIling;
+			float _YTIling;
+			float _MainTilier;
+			float4 _Color2;
 			float4 _Color;
-			float4 _T_Bear_M_ST;
 			float _Metalic;
 			float _Bright;
 			float _Dark;
@@ -2496,7 +2526,6 @@ Shader "JMD_TexturedStandradShader"
 			float4 _DoubleSidedConstants;
 			CBUFFER_END
 			sampler2D _Texture0;
-			sampler2D _T_Bear_M;
 
 
 			inline float4 TriplanarSamplingSF( sampler2D topTexMap, float3 worldPos, float3 worldNormal, float falloff, float2 tiling, float3 normalScale, float3 index )
@@ -2688,12 +2717,10 @@ Shader "JMD_TexturedStandradShader"
 				
 				outputPackedVaryingsToPS.ase_texcoord5 = float4(inputMesh.positionOS,1);
 				outputPackedVaryingsToPS.ase_normal = inputMesh.normalOS;
-				outputPackedVaryingsToPS.ase_texcoord6.xy = inputMesh.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
 				outputPackedVaryingsToPS.ase_texcoord3.w = 0;
 				outputPackedVaryingsToPS.ase_texcoord4.w = 0;
-				outputPackedVaryingsToPS.ase_texcoord6.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				float3 defaultVertexValue = inputMesh.positionOS.xyz;
@@ -2774,15 +2801,13 @@ Shader "JMD_TexturedStandradShader"
 				BuiltinData builtinData;
 
 				SmoothSurfaceDescription surfaceDescription = (SmoothSurfaceDescription)0;
+				float2 appendResult37 = (float2(_XTIling , _YTIling));
 				float3 ase_worldPos = packedInput.ase_texcoord3.xyz;
 				float3 ase_worldNormal = packedInput.ase_texcoord4.xyz;
-				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, float2( 1,1 ), 1.0, 0 );
-				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.x);
-				float2 uv_T_Bear_M = packedInput.ase_texcoord6.xy * _T_Bear_M_ST.xy + _T_Bear_M_ST.zw;
-				float4 tex2DNode34 = tex2D( _T_Bear_M, uv_T_Bear_M );
-				float temp_output_39_0 = ( 1.0 - tex2DNode34.r );
+				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, ( appendResult37 + _MainTilier ), 1.0, 0 );
+				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.y);
 				
-				surfaceDescription.Smoothness = ( lerpResult14 * temp_output_39_0 );
+				surfaceDescription.Smoothness = lerpResult14;
 				surfaceDescription.Alpha = 1;
 
 				#ifdef _ALPHATEST_ON
@@ -2923,8 +2948,9 @@ Shader "JMD_TexturedStandradShader"
 			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitDecalData.hlsl"
 			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderGraphFunctions.hlsl"
 
-			#define ASE_NEEDS_FRAG_RELATIVE_WORLD_POS
+			#define ASE_NEEDS_FRAG_WORLD_VIEW_DIR
 			#define ASE_NEEDS_FRAG_WORLD_NORMAL
+			#define ASE_NEEDS_FRAG_RELATIVE_WORLD_POS
 
 
 			#if defined(_DOUBLESIDED_ON) && !defined(ASE_NEED_CULLFACE)
@@ -2941,7 +2967,7 @@ Shader "JMD_TexturedStandradShader"
 				float4 tangentOS : TANGENT;
 				float4 uv1 : TEXCOORD1;
 				float4 uv2 : TEXCOORD2;
-				float4 ase_texcoord : TEXCOORD0;
+				
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -2954,7 +2980,6 @@ Shader "JMD_TexturedStandradShader"
 				float4 interp03 : TEXCOORD3;
 				float4 interp04 : TEXCOORD4;
 				float4 ase_texcoord5 : TEXCOORD5;
-				float4 ase_texcoord6 : TEXCOORD6;
 				float3 ase_normal : NORMAL;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
@@ -2964,9 +2989,15 @@ Shader "JMD_TexturedStandradShader"
 			};
 
 			CBUFFER_START( UnityPerMaterial )
-			float4 _SecondaryColor;
+			float _Bias;
+			float _Scale;
+			float _Power;
+			float4 _FresnelColor;
+			float _XTIling;
+			float _YTIling;
+			float _MainTilier;
+			float4 _Color2;
 			float4 _Color;
-			float4 _T_Bear_M_ST;
 			float _Metalic;
 			float _Bright;
 			float _Dark;
@@ -3006,7 +3037,6 @@ Shader "JMD_TexturedStandradShader"
 			float _DoubleSidedNormalMode;
 			float4 _DoubleSidedConstants;
 			CBUFFER_END
-			sampler2D _T_Bear_M;
 			sampler2D _Texture0;
 
 
@@ -3205,12 +3235,8 @@ Shader "JMD_TexturedStandradShader"
 				UNITY_SETUP_INSTANCE_ID(inputMesh);
 				UNITY_TRANSFER_INSTANCE_ID(inputMesh, outputPackedVaryingsMeshToPS);
 
-				outputPackedVaryingsMeshToPS.ase_texcoord5.xy = inputMesh.ase_texcoord.xy;
-				outputPackedVaryingsMeshToPS.ase_texcoord6 = float4(inputMesh.positionOS,1);
+				outputPackedVaryingsMeshToPS.ase_texcoord5 = float4(inputMesh.positionOS,1);
 				outputPackedVaryingsMeshToPS.ase_normal = inputMesh.normalOS;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				outputPackedVaryingsMeshToPS.ase_texcoord5.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				float3 defaultVertexValue = inputMesh.positionOS.xyz;
@@ -3293,28 +3319,28 @@ Shader "JMD_TexturedStandradShader"
 				SurfaceData surfaceData;
 				BuiltinData builtinData;
 				GlobalSurfaceDescription surfaceDescription = (GlobalSurfaceDescription)0;
-				float2 uv_T_Bear_M = packedInput.ase_texcoord5.xy * _T_Bear_M_ST.xy + _T_Bear_M_ST.zw;
-				float4 tex2DNode34 = tex2D( _T_Bear_M, uv_T_Bear_M );
-				float4 lerpResult35 = lerp( _SecondaryColor , _Color , tex2DNode34.r);
-				
-				float temp_output_39_0 = ( 1.0 - tex2DNode34.r );
-				
+				float fresnelNdotV40 = dot( normalWS, normalizedWorldViewDir );
+				float fresnelNode40 = ( _Bias + _Scale * pow( 1.0 - fresnelNdotV40, _Power ) );
+				float2 appendResult37 = (float2(_XTIling , _YTIling));
 				float3 ase_worldPos = GetAbsolutePositionWS( positionRWS );
-				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, float2( 1,1 ), 1.0, 0 );
-				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.x);
+				float4 triplanar31 = TriplanarSamplingSF( _Texture0, ase_worldPos, packedInput.ase_normal, 1.0, ( appendResult37 + _MainTilier ), 1.0, 0 );
+				float4 lerpResult53 = lerp( _Color2 , _Color , triplanar31.y);
+				float4 clampResult43 = clamp( ( ( fresnelNode40 * _FresnelColor * triplanar31.x ) + lerpResult53 ) , float4( 0,0,0,0 ) , float4( 1,1,1,0 ) );
 				
-				surfaceDescription.Albedo = lerpResult35.rgb;
+				float lerpResult14 = lerp( _Bright , _Dark , triplanar31.y);
+				
+				surfaceDescription.Albedo = clampResult43.rgb;
 				surfaceDescription.Normal = float3( 0, 0, 1 );
 				surfaceDescription.BentNormal = float3( 0, 0, 1 );
 				surfaceDescription.CoatMask = 0;
-				surfaceDescription.Metallic = ( _Metalic * temp_output_39_0 );
+				surfaceDescription.Metallic = _Metalic;
 
 				#ifdef _MATERIAL_FEATURE_SPECULAR_COLOR
 				surfaceDescription.Specular = 0;
 				#endif
 
 				surfaceDescription.Emission = 0;
-				surfaceDescription.Smoothness = ( lerpResult14 * temp_output_39_0 );
+				surfaceDescription.Smoothness = lerpResult14;
 				surfaceDescription.Occlusion = 1;
 				surfaceDescription.Alpha = 1;
 
@@ -3439,68 +3465,67 @@ Shader "JMD_TexturedStandradShader"
 }
 /*ASEBEGIN
 Version=17700
--1920;0;1920;1029;1765.873;357.2336;1.3;True;True
-Node;AmplifyShaderEditor.WorldPosInputsNode;19;-2185.052,-98.27832;Inherit;False;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.TexturePropertyNode;33;-1579.196,329.5008;Inherit;True;Property;_Texture0;Texture 0;7;0;Create;True;0;0;False;0;d768a0247e751344799f905aa9245e7a;d768a0247e751344799f905aa9245e7a;False;white;Auto;Texture2D;-1;0;1;SAMPLER2D;0
-Node;AmplifyShaderEditor.TriplanarNode;31;-1334.196,289.5008;Inherit;True;Spherical;Object;False;Top Texture 0;_TopTexture0;white;-1;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;False;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;34;-537.28,582.7271;Inherit;True;Property;_T_Bear_M;T_Bear_M;8;0;Create;True;0;0;False;0;-1;56b1fb51e7e21444f9b046e4fefcd9b8;56b1fb51e7e21444f9b046e4fefcd9b8;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;6;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.BreakToComponentsNode;26;-535.0527,-45.27832;Inherit;False;FLOAT4;1;0;FLOAT4;0,0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
-Node;AmplifyShaderEditor.RangedFloatNode;16;-331.0525,-345.2783;Inherit;False;Property;_Bright;Bright;4;0;Create;True;0;0;False;0;0.85;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;15;-441.0525,-264.2783;Inherit;False;Property;_Dark;Dark;5;0;Create;True;0;0;False;0;0.6370589;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.ColorNode;18;-536.9525,366.5217;Inherit;False;Property;_Color;Color;6;0;Create;True;0;0;False;0;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.ColorNode;37;-294.1801,814.127;Inherit;False;Property;_SecondaryColor;SecondaryColor;2;0;Create;True;0;0;False;0;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.OneMinusNode;39;-233.1729,360.3664;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+-1920;0;1920;1029;2049.586;474.9074;1.6;True;True
+Node;AmplifyShaderEditor.RangedFloatNode;36;-1793.029,616.2761;Inherit;False;Property;_YTIling;YTIling;7;0;Create;True;0;0;False;0;1;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;35;-1819.629,487.076;Inherit;False;Property;_XTIling;XTIling;6;0;Create;True;0;0;False;0;1;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;39;-1643.756,772.0599;Inherit;False;Property;_MainTilier;MainTilier;8;0;Create;True;0;0;False;0;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.DynamicAppendNode;37;-1549.349,610.0535;Inherit;False;FLOAT2;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT2;0
+Node;AmplifyShaderEditor.SimpleAddOpNode;38;-1352.378,649.681;Inherit;False;2;2;0;FLOAT2;0,0;False;1;FLOAT;0;False;1;FLOAT2;0
+Node;AmplifyShaderEditor.WorldPosInputsNode;19;-1517.592,100.5396;Inherit;False;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
+Node;AmplifyShaderEditor.TexturePropertyNode;33;-1579.196,329.5008;Inherit;True;Property;_Texture0;Texture 0;5;0;Create;True;0;0;False;0;d768a0247e751344799f905aa9245e7a;d768a0247e751344799f905aa9245e7a;False;white;Auto;Texture2D;-1;0;1;SAMPLER2D;0
+Node;AmplifyShaderEditor.RangedFloatNode;50;-1029.844,699.3993;Inherit;False;Property;_Scale;Scale;11;0;Create;True;0;0;False;0;1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;49;-1047.844,529.3993;Inherit;False;Property;_Bias;Bias;9;0;Create;True;0;0;False;0;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;51;-1006.844,782.3993;Inherit;False;Property;_Power;Power;12;0;Create;True;0;0;False;0;2;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.ColorNode;18;-566.4907,561.0826;Inherit;False;Property;_Color;Color;3;0;Create;True;0;0;False;0;0,0,0,0;0.148603,0.1481844,0.1698113,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;44;-802.252,458.2984;Inherit;False;Property;_FresnelColor;FresnelColor;10;0;Create;True;0;0;False;0;0.7075472,0.6841848,0.6841848,0;0.7075472,0.6841848,0.6841848,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;54;-553.5861,845.0925;Inherit;False;Property;_Color2;Color2;4;0;Create;True;0;0;False;0;0.3867925,0.1437147,0.1039961,0;0.148603,0.1481844,0.1698113,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.TriplanarNode;31;-1274.086,277.4371;Inherit;True;Spherical;Object;False;Top Texture 0;_TopTexture0;white;-1;None;Mid Texture 0;_MidTexture0;white;-1;None;Bot Texture 0;_BotTexture0;white;-1;None;Triplanar Sampler;False;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.FresnelNode;40;-824.7458,253.6725;Inherit;False;Standard;TangentNormal;ViewDir;False;False;5;0;FLOAT3;0,0,1;False;4;FLOAT3;0,0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;5;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;45;-516.252,351.2984;Inherit;False;3;3;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.LerpOp;53;-239.9861,566.6926;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;16;-331.0525,-345.2783;Inherit;False;Property;_Bright;Bright;1;0;Create;True;0;0;False;0;0.85;0.45;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.BreakToComponentsNode;26;-538.8527,-30.07832;Inherit;False;FLOAT4;1;0;FLOAT4;0,0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
+Node;AmplifyShaderEditor.SimpleAddOpNode;42;-323.5781,356.4654;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;15;-441.0525,-264.2783;Inherit;False;Property;_Dark;Dark;2;0;Create;True;0;0;False;0;0.6370589;0.83;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;11;-469.0525,182.7217;Inherit;False;Property;_Metalic;Metalic;0;0;Create;True;0;0;False;0;0;1;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;14;-262.0525,-142.2783;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;11;-470.3525,182.7217;Inherit;False;Property;_Metalic;Metalic;3;0;Create;True;0;0;False;0;0;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;38;-79.77295,322.6663;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.ComponentMaskNode;21;-1494.052,-89.27832;Inherit;False;True;True;False;True;1;0;FLOAT3;0,0,0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.NormalizeNode;28;-2073.24,133.4833;Inherit;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.ComponentMaskNode;22;-1490.053,13.72168;Inherit;False;False;True;True;True;1;0;FLOAT3;0,0,0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.ComponentMaskNode;23;-1475.053,121.7217;Inherit;False;True;True;False;True;1;0;FLOAT3;0,0,0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.SamplerNode;12;-1131.052,-246.2783;Inherit;True;Property;_M_Conveyour_Masks;M_Conveyour_Masks;0;0;Create;True;0;0;False;0;-1;d768a0247e751344799f905aa9245e7a;d768a0247e751344799f905aa9245e7a;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;6;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;25;-1132.053,-7.278305;Inherit;True;Property;_M_Conveyour_Masks1;M_Conveyour_Masks;1;0;Create;True;0;0;False;0;-1;d768a0247e751344799f905aa9245e7a;d768a0247e751344799f905aa9245e7a;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;6;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.LerpOp;24;-746.9526,-103.8783;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;40;-65.47305,173.1664;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.BreakToComponentsNode;30;-1910.069,208.8182;Inherit;False;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
-Node;AmplifyShaderEditor.LerpOp;35;-138.1801,524.2269;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleAddOpNode;27;-1606.215,124.4796;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;0;109,103;Float;False;True;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;2;JMD_TexturedStandradShader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;GBuffer;0;0;GBuffer;35;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;True;0;True;-23;False;True;True;0;True;-12;255;False;-1;255;True;-11;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;False;True;0;True;-13;False;True;1;LightMode=GBuffer;False;0;;0;0;Standard;29;Surface Type;0;  Rendering Pass;1;  Refraction Model;0;    Blending Mode;0;    Blend Preserves Specular;1;  Receive Fog;1;  Back Then Front Rendering;0;  Transparent Depth Prepass;0;  Transparent Depth Postpass;0;  Transparent Writes Motion Vector;0;  Distortion;0;    Distortion Mode;0;    Distortion Depth Test;1;  ZWrite;0;  Z Test;4;Double-Sided;0;Alpha Clipping;0;  Use Shadow Threshold;0;Material Type,InvertActionOnDeselection;0;  Energy Conserving Specular;1;  Transmission;1;Receive Decals;1;Receives SSR;1;Specular AA;0;Specular Occlusion Mode;0;Override Baked GI;0;Depth Offset;0;DOTS Instancing;0;Vertex Position;1;0;11;True;True;True;True;True;True;False;False;False;False;True;False;;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;6;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;Distortion;0;6;Distortion;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;4;1;False;-1;1;False;-1;4;1;False;-1;1;False;-1;True;1;False;-1;1;False;-1;False;False;False;True;True;0;True;-9;255;False;-1;255;True;-9;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;2;False;-1;True;3;False;-1;False;True;1;LightMode=DistortionVectors;False;0;;0;0;Standard;0;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;8;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;TransparentDepthPrepass;0;8;TransparentDepthPrepass;1;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;True;0;True;-23;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=TransparentDepthPrepass;False;0;;0;0;Standard;0;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;10;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;Forward;0;10;Forward;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;1;0;True;-18;0;True;-19;1;0;True;-20;0;True;-21;False;False;True;0;True;-25;False;True;True;0;True;-3;255;False;-1;255;True;-4;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;0;True;-22;True;0;True;-27;False;True;1;LightMode=Forward;False;0;;0;0;Standard;0;0
+Node;AmplifyShaderEditor.ClampOpNode;43;-111.5521,383.1984;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;COLOR;1,1,1,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;0;109,103;Float;False;True;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;2;JMD_BearShader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;GBuffer;0;0;GBuffer;35;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;True;0;True;-23;False;True;True;0;True;-12;255;False;-1;255;True;-11;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;False;True;0;True;-13;False;True;1;LightMode=GBuffer;False;0;;0;0;Standard;29;Surface Type;0;  Rendering Pass;1;  Refraction Model;0;    Blending Mode;0;    Blend Preserves Specular;1;  Receive Fog;1;  Back Then Front Rendering;0;  Transparent Depth Prepass;0;  Transparent Depth Postpass;0;  Transparent Writes Motion Vector;0;  Distortion;0;    Distortion Mode;0;    Distortion Depth Test;1;  ZWrite;0;  Z Test;4;Double-Sided;0;Alpha Clipping;0;  Use Shadow Threshold;0;Material Type,InvertActionOnDeselection;0;  Energy Conserving Specular;1;  Transmission;1;Receive Decals;1;Receives SSR;1;Specular AA;0;Specular Occlusion Mode;0;Override Baked GI;0;Depth Offset;0;DOTS Instancing;0;Vertex Position;1;0;11;True;True;True;True;True;True;False;False;False;False;True;False;;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;META;0;1;META;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;True;2;False;-1;False;False;False;False;False;True;1;LightMode=Meta;False;0;;0;0;Standard;0;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;9;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;TransparentDepthPostpass;0;9;TransparentDepthPostpass;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;True;0;True;-23;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=TransparentDepthPostpass;False;0;;0;0;Standard;0;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;7;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;TransparentBackface;0;7;TransparentBackface;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;1;0;True;-18;0;True;-19;1;0;True;-20;0;True;-21;False;False;True;1;False;-1;False;False;True;0;True;-22;True;0;True;-28;False;True;1;LightMode=TransparentBackface;False;0;;0;0;Standard;0;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;3;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;SceneSelectionPass;0;3;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;False;True;False;False;False;False;0;False;-1;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;0;;0;0;Standard;0;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;5;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;Motion Vectors;0;5;Motion Vectors;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;True;0;True;-23;False;True;True;0;True;-7;255;False;-1;255;True;-8;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;False;False;True;1;LightMode=MotionVectors;False;0;;0;0;Standard;0;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;6;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;Distortion;0;6;Distortion;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;4;1;False;-1;1;False;-1;4;1;False;-1;1;False;-1;True;1;False;-1;1;False;-1;False;False;False;True;True;0;True;-9;255;False;-1;255;True;-9;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;2;False;-1;True;3;False;-1;False;True;1;LightMode=DistortionVectors;False;0;;0;0;Standard;0;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;True;0;True;-23;True;False;False;False;False;0;False;-1;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;;0;0;Standard;0;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;10;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;Forward;0;10;Forward;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;1;0;True;-18;0;True;-19;1;0;True;-20;0;True;-21;False;False;True;0;True;-25;False;True;True;0;True;-3;255;False;-1;255;True;-4;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;0;True;-22;True;0;True;-27;False;True;1;LightMode=Forward;False;0;;0;0;Standard;0;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;8;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;TransparentDepthPrepass;0;8;TransparentDepthPrepass;1;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;True;0;True;-23;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=TransparentDepthPrepass;False;0;;0;0;Standard;0;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;9;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;TransparentDepthPostpass;0;9;TransparentDepthPostpass;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;True;0;True;-23;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=TransparentDepthPostpass;False;0;;0;0;Standard;0;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;4;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;DepthOnly;0;4;DepthOnly;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;True;0;True;-23;False;True;True;0;True;-5;255;False;-1;255;True;-6;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;;0;0;Standard;0;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;5;0,0;Float;False;False;-1;2;UnityEditor.Rendering.HighDefinition.HDLitGUI;0;1;New Amplify Shader;53b46d85872c5b24c8f4f0a1c3fe4c87;True;Motion Vectors;0;5;Motion Vectors;0;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=HDRenderPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;5;0;False;False;False;True;0;True;-23;False;True;True;0;True;-7;255;False;-1;255;True;-8;7;False;-1;3;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;False;False;True;1;LightMode=MotionVectors;False;0;;0;0;Standard;0;0
+WireConnection;37;0;35;0
+WireConnection;37;1;36;0
+WireConnection;38;0;37;0
+WireConnection;38;1;39;0
 WireConnection;31;0;33;0
 WireConnection;31;9;19;0
+WireConnection;31;3;38;0
+WireConnection;40;1;49;0
+WireConnection;40;2;50;0
+WireConnection;40;3;51;0
+WireConnection;45;0;40;0
+WireConnection;45;1;44;0
+WireConnection;45;2;31;1
+WireConnection;53;0;54;0
+WireConnection;53;1;18;0
+WireConnection;53;2;31;2
 WireConnection;26;0;31;0
-WireConnection;39;0;34;1
+WireConnection;42;0;45;0
+WireConnection;42;1;53;0
 WireConnection;14;0;16;0
 WireConnection;14;1;15;0
-WireConnection;14;2;26;0
-WireConnection;38;0;14;0
-WireConnection;38;1;39;0
-WireConnection;21;0;19;0
-WireConnection;28;0;19;0
-WireConnection;22;0;19;0
-WireConnection;12;1;21;0
-WireConnection;25;1;22;0
-WireConnection;24;0;12;0
-WireConnection;24;1;25;0
-WireConnection;24;2;27;0
-WireConnection;40;0;11;0
-WireConnection;40;1;39;0
-WireConnection;30;0;28;0
-WireConnection;35;0;37;0
-WireConnection;35;1;18;0
-WireConnection;35;2;34;1
-WireConnection;27;0;30;0
-WireConnection;0;0;35;0
-WireConnection;0;4;40;0
-WireConnection;0;7;38;0
+WireConnection;14;2;26;1
+WireConnection;43;0;42;0
+WireConnection;0;0;43;0
+WireConnection;0;4;11;0
+WireConnection;0;7;14;0
 ASEEND*/
-//CHKSM=31D89B704301171823D2A0DBC8C251FD0B123504
+//CHKSM=325E467E4019A38916DF464506D7B6F0E24F2D2F

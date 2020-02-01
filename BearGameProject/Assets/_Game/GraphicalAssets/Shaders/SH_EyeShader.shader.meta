@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 321c0a456e805534fafec610075d7616
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _T_BearEye_C: {fileID: 2800000, guid: 0f6467a33c42fb74e902bd6bb26ec7d8, type: 3}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
