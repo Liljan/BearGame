@@ -27,9 +27,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.25695702
-  m_Height: 0.98
+  m_Height: 0.9740638
   m_Direction: 1
-  m_Center: {x: 0.0005944818, y: 0.27, z: 0.000562787}
+  m_Center: {x: 0.12, y: 0.14, z: 0.000562779}
 --- !u!114 &3490653439124928884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,8 +59,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 923cfe29747dce14bae9f549e4941292, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_FallSpeed: 10
+  m_FallSpeed: 0.01
   m_ConveyorBeltSpeed: 2
+  m_maxForceMultiplier: 2.5
+  m_upAmount: 0.2
   m_PushMultiplier: 50
   m_RigidBody: {fileID: 2700895961980954981}
 --- !u!1 &7752689767802361543
