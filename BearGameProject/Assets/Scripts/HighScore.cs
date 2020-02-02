@@ -2,19 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using System;
 
 public class HighScore : MonoBehaviour
 {
+    [SerializeField]
+    private UnityAction _scoreSubmitButtonListener;
+
     [SerializeField]
     private Transform _entryContainer;
 
     [SerializeField]
     private Transform _entryTemplate;
 
+    [SerializeField]
+    private Text _nameInput;
+
+    [SerializeField]
+    private Button _submitButton;
+
     private List<Transform> highScoreEntryTransformList;
-    
+
     void Awake()
     {
+        _scoreSubmitButtonListener = new UnityAction(submitScoreToList);
         _entryTemplate.gameObject.SetActive(false);
 
         string jsonString = PlayerPrefs.GetString("highScoreTable");
@@ -47,6 +59,55 @@ public class HighScore : MonoBehaviour
             entryCounter++;
         }
 
+    }
+
+    void OnEnable()
+    {
+        if (_scoreSubmitButtonListener == null)
+        {
+            _scoreSubmitButtonListener = new UnityAction(submitScoreToList);
+        }
+        EventManager.StartListening("highScoreSubmitted", _scoreSubmitButtonListener);
+        _submitButton.onClick.AddListener(submitScoreToPrefs);
+    }
+
+    void OnDisable()
+    {
+        EventManager.StopListening("highScoreSubmitted", _scoreSubmitButtonListener);
+    }
+    
+    void Start()
+    {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+    }
+
+    private void submitScoreToList()
+    {
+        int scoreFromPref = 0;
+        string nameFromPref = PlayerPrefs.GetString("highScorePlayerName");
+        string scoreFromPrefString = PlayerPrefs.GetString("highScorePlayerScore");
+        Debug.Log(scoreFromPrefString);
+        if (scoreFromPrefString != "")
+        {
+            scoreFromPref = Int32.Parse(scoreFromPrefString);
+        }
+
+        AddHighScoreEntry(scoreFromPref, nameFromPref);
+    }
+
+    private void submitScoreToPrefs()
+    {
+        PlayerPrefs.SetString("highScorePlayerName", _nameInput.ToString());
+
+        // set score
+        PlayerPrefs.SetString("highScorePlayerScore", _nameInput.ToString());
+        PlayerPrefs.Save();
+
+        EventManager.TriggerEvent("highScoreSubmitted");
     }
 
     private void CreateHighScoreEntryTransform(HighScoreEntry entry, Transform container, List<Transform> transformList)
