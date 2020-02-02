@@ -14,7 +14,7 @@ public class Spawner : MonoBehaviour
     public float m_fConveyorBeltSpeed;
 
     private List<GameObject> m_SpawnedObjects = new List<GameObject>();
-    //private List<GameObject> m_ObjectsOnConveyor = new List<GameObject>();
+    private List<GameObject> m_ObjectIDsOnBelt = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -32,7 +32,9 @@ public class Spawner : MonoBehaviour
     public void SpawnObjects()
     {
         GameObject spawnedObj = Instantiate(m_ObjectToSpawn, m_StartPoint.position, m_StartPoint.rotation);
+        int ID = spawnedObj.GetInstanceID();
         m_SpawnedObjects.Add(spawnedObj);
+        m_ObjectIDsOnBelt.Add(spawnedObj);
 
         Mover mover = spawnedObj.GetComponentInChildren<Mover>();
 
@@ -56,6 +58,17 @@ public class Spawner : MonoBehaviour
 
         // Use the garbage collection
         m_SpawnedObjects.Clear();
+        m_ObjectIDsOnBelt.Clear();
+    }
+
+    public void RemoveBearFromBelt(GameObject obj)
+    {
+        m_ObjectIDsOnBelt.Remove(obj);
+    }
+
+    public bool HasObjectsOnBelt()
+    {
+        return m_ObjectIDsOnBelt.Count != 0;
     }
 
 }

@@ -20,8 +20,6 @@ public class UIScore : MonoBehaviour
 
         // Assign score UI text component to handle
         m_ScoreText.text = "Score: " + m_CurrentScore.ToString();
-
-        Debug.Log("Started Score");
     }
 
     // Update is called once per frame

@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        EventManager.StartListening("GameOver", GotoGameOverState);
+        EventManager.StartListening("GameOver", GotoPostGameState);
 
         GotoPreGameState();
     }
@@ -64,10 +64,13 @@ public class GameManager : MonoBehaviour
         StartCoroutine(PreGamePlayState());
     }
 
-    public void GotoGameOverState()
+    public void GotoPostGameState()
     {
-        Debug.Log("The game is over");
-        ResetGame();
+        Debug.Log("PostGameState");
+
+        StartCoroutine(PostGamePlayState());
+
+        
     }
 
     public void GotoGameplayState()
@@ -75,6 +78,12 @@ public class GameManager : MonoBehaviour
         EventManager.TriggerEvent("StartGame");
         // The game is playing
         // Then the timer calls the game to end.
+    }
+
+    public void GotoGameOverState()
+    {
+        // Go to the high score menu or something...
+        GotoPreGameState();
     }
 
     IEnumerator PreGamePlayState()
@@ -87,6 +96,22 @@ public class GameManager : MonoBehaviour
         Debug.Log("Go!");
 
         GotoGameplayState();
+    }
+
+    IEnumerator PostGamePlayState()
+    {
+        bool hasBearsOnBelt = true;
+
+        while(hasBearsOnBelt)
+        {
+            hasBearsOnBelt = m_Spawner.HasObjectsOnBelt();
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        Debug.Log("The game is over... Restarting in 1 second");
+        yield return new WaitForSeconds(1.0f);
+
+        GotoGameOverState();
     }
 
     public void Spawn()
