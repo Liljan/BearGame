@@ -100,4 +100,35 @@ public class BearScript : MonoBehaviour
     {
         
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Leg")
+        {
+            if (TryAddLeg())
+            {
+                Debug.Log("Consume leg");
+                Destroy(other.gameObject);
+            }
+        }
+
+        else if (other.tag == "Arm")
+        {
+            if (TryAddArm())
+            {
+                Debug.Log("Consume Arm");
+                Destroy(other.gameObject);
+            }
+        }
+
+        else if (other.tag == "Head")
+        {
+            if (TryAddHead())
+            {
+                Debug.Log("Consume Head");
+                Destroy(other.gameObject);
+            }
+        }
+
+    }
 }
