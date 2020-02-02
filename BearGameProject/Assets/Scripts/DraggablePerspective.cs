@@ -33,6 +33,9 @@ public class DraggablePerspective : MonoBehaviour
             {
                 draggingObject.position = ray.GetPoint(distance); // distance along the ray
             }
+
+            if (Input.GetKey(KeyCode.Mouse0) == false)
+                EndDrag();
         }
     }
 

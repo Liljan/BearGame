@@ -74,7 +74,7 @@ public class Mover : MonoBehaviour
     {
         //StartCoroutine(BearDropper());
 
-        float distance = m_FallSpeed * Time.time;
+        float distance = m_FallSpeed + (Time.deltaTime * 10.0f);
         transform.position = Vector3.MoveTowards(transform.position, m_DropPoint.position, distance);
         // Check if the position of the cube and sphere are approximately equal.
         if (Vector3.Distance(transform.position, m_DropPoint.position) < 0.001f)

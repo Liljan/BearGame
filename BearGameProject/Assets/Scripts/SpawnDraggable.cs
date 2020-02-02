@@ -27,6 +27,7 @@ public class SpawnDraggable : MonoBehaviour
         //{
         //    ClearSpawnedObjects();
         //}
+
     }
 
     void OnMouseDown()
@@ -42,6 +43,7 @@ public class SpawnDraggable : MonoBehaviour
                     GameObject obj = Instantiate(Prefab, new Vector3(Hit.point.x, Hit.point.y, Hit.point.z), Quaternion.identity) as GameObject;
                     obj.GetComponent<DraggablePerspective>().MainCamera = MainCamera;
                     obj.GetComponent<DraggablePerspective>().HeightOffset = HeightOffset;
+                    obj.GetComponent<DraggablePerspective>().BeginDrag();
 
                     spawnedObjects.Add(obj);
                 }
