@@ -22,12 +22,15 @@ public class ScoreTrigger : MonoBehaviour
             return;
 
         // Validate the bear
-        BearScript bear = bearCollider.gameObject.GetComponent<BearScript>();
+        BearScript bear = bearCollider.gameObject.GetComponentInChildren<BearScript>();
 
-        //if(bearIisComplete())
-        //    EventManager.TriggerEvent("IncreaseScore");
-
-        // Temp
-        EventManager.TriggerEvent("IncreaseScore");
+        if(bear.IsBearCompleted())
+        {
+            EventManager.TriggerEvent("BearScore");
+        }
+        else
+        {
+            EventManager.TriggerEvent("BearFailed");
+        }
     }
 }

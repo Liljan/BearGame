@@ -39,7 +39,7 @@ public class BearScript : MonoBehaviour
         }
     }
 
-    bool IsBearCompleted()
+    public bool IsBearCompleted()
     {
         return Head.activeSelf && LeftArm.activeSelf && RightArm.activeSelf && LeftLeg.activeSelf && RightLeg.activeSelf;
     }
