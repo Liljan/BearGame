@@ -108,6 +108,7 @@ public class Mover : MonoBehaviour
             // Swap the position of the cylinder.
             m_IsMovingOnBelt = false;
             m_RigidBody.useGravity = true;
+            m_RigidBody.mass = 1.0f;
             m_RigidBody.AddRelativeForce((transform.forward + (transform.up * m_upAmount)) * m_ConveyorBeltSpeed * m_PushMultiplier * Random.Range(1.0f, m_maxForceMultiplier));
         }
     }

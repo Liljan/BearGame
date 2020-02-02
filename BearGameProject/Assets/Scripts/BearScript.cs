@@ -10,6 +10,8 @@ public class BearScript : MonoBehaviour
     public GameObject LeftLeg;
     public GameObject RightLeg;
 
+    public bool PassedGoal = false;
+
     public void SetupBearParameters(bool showHead, bool showLeftArm, bool showRightArm, bool showLeftLeg, bool showRightLeg)
     {
         if(Head != null)

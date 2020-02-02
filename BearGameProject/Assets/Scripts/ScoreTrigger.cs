@@ -20,11 +20,16 @@ public class ScoreTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider bearCollider)
     {
+        Debug.Log("BearFinished");
+
         if(bearCollider.tag != "Bear")
             return;
 
         // Validate the bear
         BearScript bear = bearCollider.gameObject.GetComponentInChildren<BearScript>();
+
+        if (bear.PassedGoal)
+            return;
 
         if(bear.IsBearCompleted())
         {
@@ -34,6 +39,7 @@ public class ScoreTrigger : MonoBehaviour
         {
             EventManager.TriggerEvent("BearFailed");
         }
+        bear.PassedGoal = true;
 
         // Hack. To reach the base of the object (the parent) the Bear hierarchy structure
         // must look like this.
