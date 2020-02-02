@@ -41,8 +41,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.8, y: 1.11, z: 0.92}
-  m_Center: {x: 0.2, y: 0.19, z: 0.027901199}
+  m_Size: {x: 0.8, y: 1.32, z: 0.92}
+  m_Center: {x: 0.2, y: 0.18, z: 0.027901199}
 --- !u!114 &3490653439124928884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,6 +60,7 @@ MonoBehaviour:
   RightArm: {fileID: 1780887036265941870}
   LeftLeg: {fileID: 1780887036295461868}
   RightLeg: {fileID: 1780887035763488871}
+  PassedGoal: 0
 --- !u!114 &8435425446886334962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,7 +74,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_FallSpeed: 0.01
-  m_ConveyorBeltSpeed: 0.3
+  m_ConveyorBeltSpeed: 1
   m_maxForceMultiplier: 2.5
   m_upAmount: 0.2
   m_PushMultiplier: 50
