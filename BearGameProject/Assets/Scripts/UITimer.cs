@@ -4,17 +4,15 @@ using UnityEngine.UI;
 
 public class UITimer : MonoBehaviour
 {
-    public Text m_TimerText;
     public int m_TotalTime;
 
-    private float m_TimeLeft = 60.0f;
+    private float m_TimeLeft;
     private bool m_HasTriggeredGameOver = false;
     private bool m_bHasStarted = false;
 
     void Start()
     {
-        m_TimerText.text = m_TimeLeft.ToString("0");
-
+        m_TimeLeft = m_TotalTime;
         EventManager.StartListening("ResetGame", ResetTimer);
         EventManager.StartListening("StartGame", StartTimer);
     }
@@ -30,11 +28,12 @@ public class UITimer : MonoBehaviour
 
         m_TimeLeft -= Time.deltaTime;
 
-        string seconds = (m_TimeLeft % 60).ToString("0");
-
-        if (m_TimeLeft > 0.0f )
+        if ( m_TimeLeft > 0 )
         {
-            m_TimerText.text = seconds;
+            float percLeft = m_TimeLeft / m_TotalTime;
+            float totalDegrees = percLeft * 360;
+            transform.localRotation = Quaternion.Euler(-totalDegrees, 0, 0);
+
         } else
         {
             m_HasTriggeredGameOver = true;
