@@ -51,12 +51,14 @@ public class BearScript : MonoBehaviour
         if(!RightArm.activeSelf)
         {
             RightArm.SetActive(true);
+            EventManager.TriggerEvent("PartAttach");
             return true;
         }
         
         if(!LeftArm.activeSelf)
         {
             LeftArm.SetActive(true);
+            EventManager.TriggerEvent("PartAttach");
             return true;
         }
 
@@ -68,12 +70,14 @@ public class BearScript : MonoBehaviour
         if (!LeftLeg.activeSelf)
         {
             LeftLeg.SetActive(true);
+            EventManager.TriggerEvent("PartAttach");
             return true;
         }
 
         if (!RightLeg.activeSelf)
         {
             RightLeg.SetActive(true);
+            EventManager.TriggerEvent("PartAttach");
             return true;
         }
 
@@ -85,6 +89,7 @@ public class BearScript : MonoBehaviour
         if (!Head.activeSelf)
         {
             Head.SetActive(true);
+            EventManager.TriggerEvent("PartAttach");
             return true;
         }
 
@@ -111,6 +116,9 @@ public class BearScript : MonoBehaviour
             {
                 Debug.Log("Consume leg");
                 Destroy(other.gameObject);
+
+                if(IsBearCompleted())  
+                    EventManager.TriggerEvent("BearCompleted");
             }
         }
 
@@ -120,6 +128,9 @@ public class BearScript : MonoBehaviour
             {
                 Debug.Log("Consume Arm");
                 Destroy(other.gameObject);
+
+                if (IsBearCompleted())
+                    EventManager.TriggerEvent("BearCompleted");
             }
         }
 
@@ -129,6 +140,9 @@ public class BearScript : MonoBehaviour
             {
                 Debug.Log("Consume Head");
                 Destroy(other.gameObject);
+
+                if (IsBearCompleted())
+                    EventManager.TriggerEvent("BearCompleted");
             }
         }
 

@@ -19,6 +19,8 @@ public class Spawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //
+        EventManager.StartListening("BearCompleted", SpawnObjects);
         //EventManager.StartListening("TimesUp", ClearObjects);
         EventManager.StartListening("ResetGame", ClearObjects);
     }

@@ -50,7 +50,6 @@ public class UITimer : MonoBehaviour
     {
         // reset the time
         m_TimeLeft = m_TotalTime;
-        m_TimerText.text = m_TimeLeft.ToString("0");
         m_HasTriggeredGameOver = false;
         m_bHasStarted = false;
     }
