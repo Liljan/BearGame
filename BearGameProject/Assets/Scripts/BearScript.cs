@@ -10,7 +10,7 @@ public class BearScript : MonoBehaviour
     public GameObject LeftLeg;
     public GameObject RightLeg;
 
-    void SetupBearParameters(bool showHead, bool showLeftArm, bool showRightArm, bool showLeftLeg, bool showRightLeg)
+    public void SetupBearParameters(bool showHead, bool showLeftArm, bool showRightArm, bool showLeftLeg, bool showRightLeg)
     {
         if(Head != null)
         {
@@ -30,12 +30,12 @@ public class BearScript : MonoBehaviour
 
         if (LeftLeg != null)
         {
-            LeftLeg.SetActive(showRightLeg);
+            LeftLeg.SetActive(showLeftArm);
         }
 
         if (RightLeg != null)
         {
-            RightLeg.SetActive(RightLeg);
+            RightLeg.SetActive(showRightLeg);
         }
     }
 

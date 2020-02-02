@@ -32,7 +32,6 @@ public class Spawner : MonoBehaviour
     public void SpawnObjects()
     {
         GameObject spawnedObj = Instantiate(m_ObjectToSpawn, m_StartPoint.position, m_StartPoint.rotation);
-        int ID = spawnedObj.GetInstanceID();
         m_SpawnedObjects.Add(spawnedObj);
         m_ObjectIDsOnBelt.Add(spawnedObj);
 
@@ -44,6 +43,21 @@ public class Spawner : MonoBehaviour
         mover.SetEndPoint(m_EndPoint);
 
         mover.StartFalling();
+
+        bool head = Random.value > 0.5 ? true : false;
+        bool leftArm = Random.value > 0.5 ? true : false;
+        bool rightArm = Random.value > 0.5 ? true : false;
+        bool leftLeg = Random.value > 0.5 ? true : false;
+        bool rightLeg = Random.value > 0.5 ? true : false;
+
+        // Handle the boring special case
+        if (head && leftArm && rightArm && leftLeg && rightLeg)
+        {
+            head = false;
+        }
+
+        BearScript bear = spawnedObj.GetComponentInChildren<BearScript>();
+        bear.SetupBearParameters(head, leftArm, rightArm, leftLeg, rightLeg);
 
         EventManager.TriggerEvent("BearSpawn");
     }

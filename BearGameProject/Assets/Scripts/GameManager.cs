@@ -69,8 +69,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("PostGameState");
 
         StartCoroutine(PostGamePlayState());
-
-        
     }
 
     public void GotoGameplayState()
