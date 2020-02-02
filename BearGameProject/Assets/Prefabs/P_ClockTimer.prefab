@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 8204169579810581749}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 8.065853, y: 3.3811462, z: 2.226265}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 6, z: 6}
   m_Children:
   - {fileID: 8252226888375891252}
   - {fileID: 8252226888104483441}
@@ -617,10 +617,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8252226886867805591}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.081, z: 0}
+  m_LocalPosition: {x: 0, y: 0.048, z: 0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.005}
   m_Children: []
-  m_Father: {fileID: 8252226887101816960}
+  m_Father: {fileID: 8252226888104483441}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8252226886867805579
@@ -683,37 +683,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &8252226887101816961
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8252226887101816960}
-  m_Layer: 0
-  m_Name: ClockHand
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8252226887101816960
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8252226887101816961}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.123, z: 0.22}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 8252226886867805590}
-  m_Father: {fileID: 8252226888104483441}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8252226887213902138
 GameObject:
   m_ObjectHideFlags: 0
@@ -1219,6 +1188,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8252226888104483441}
+  - component: {fileID: 1486518183182790916}
   m_Layer: 0
   m_Name: ClockHandTimer
   m_TagString: Untagged
@@ -1234,13 +1204,26 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8252226888104483442}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.08614731, y: -0.0000333786, z: -0.000018119812}
+  m_LocalPosition: {x: -0.08614731, y: 0.12, z: 0.227}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 8252226887101816960}
+  - {fileID: 8252226886867805590}
   m_Father: {fileID: 5244928430917548922}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1486518183182790916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8252226888104483442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63144784e2dc8495a893fbacb889c325, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TotalTime: 60
 --- !u!1 &8252226888332390967
 GameObject:
   m_ObjectHideFlags: 0
