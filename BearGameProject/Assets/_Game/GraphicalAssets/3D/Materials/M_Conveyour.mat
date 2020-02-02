@@ -58,7 +58,7 @@ Material:
     - _ReceivesSSR: 1
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
-    - _Speed: 1.2
+    - _Speed: 0.08
     - _SrcBlend: 1
     - _StencilRef: 2
     - _StencilRefDepth: 0

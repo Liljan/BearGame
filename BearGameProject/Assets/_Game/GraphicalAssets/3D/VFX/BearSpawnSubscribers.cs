@@ -14,22 +14,27 @@ public class BearSpawnSubscribers : MonoBehaviour
     public Color baseLightColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     public float baseLightIntensity = 6000.0f;
 
+    //Attached part
+    public AudioClip attachedPart;
 
     //Scored
     [ColorUsageAttribute(false,true)]
     public Color scoreColor = new Color(1.6f, 16.0f, 0.0f, 1.0f);
     public Color scoreLightColor = new Color(0.05f, 1.0f, 0.0f, 1.0f);
     public float scoreLightIntensity = 18000.0f;
+    public AudioClip scoredClip;
 
     //Failed
     [ColorUsageAttribute(false,true)]
     public Color failColor = new Color(25.6f, 0.0f, 0.0f, 1.0f);
     public Color failLightColor = new Color(1.0f, 0.0f, 0.0f, 1.0f);
     public float failLightIntensity = 18000.0f;
+    public AudioClip failedClip;
 
     public GameObject warningLight;
     private Material warningLightMaterial;
     public Light warningLightLight;
+    public AudioSource audioPlayer;
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +42,7 @@ public class BearSpawnSubscribers : MonoBehaviour
         EventManager.StartListening("BearSpawn", BearHasSpawned);
         EventManager.StartListening("BearScore", BearPoint);
         EventManager.StartListening("BearFailed", BearNoPoint);
+        EventManager.StartListening("PartAttach", AttachPart);
     }
 
     // Update is called once per frame
@@ -46,6 +52,13 @@ public class BearSpawnSubscribers : MonoBehaviour
             EventManager.TriggerEvent("BearScore");
         if (Input.GetKeyDown("o"))
             EventManager.TriggerEvent("BearFailed");
+        if (Input.GetKeyDown("p"))
+            EventManager.TriggerEvent("ParthAttach");
+    }
+
+    void AttachPart()
+    {
+        audioPlayer.PlayOneShot(attachedPart);
     }
 
 
@@ -81,12 +94,15 @@ public class BearSpawnSubscribers : MonoBehaviour
             color = scoreColor;
             lightColor = scoreLightColor;
             intensity = scoreLightIntensity;
+            audioPlayer.PlayOneShot(scoredClip);
         }
         else
         {
             color = failColor;
             lightColor = failLightColor;
             intensity = failLightIntensity;
+            audioPlayer.PlayOneShot(failedClip);
+
         }
         warningLightMaterial.SetColor("_WarningColor", color);
         warningLightLight.intensity = intensity;
