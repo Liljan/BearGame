@@ -122,7 +122,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2058370086453328395}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.37, y: 1.081, z: -0.752}
+  m_LocalPosition: {x: 1.37, y: 1.081, z: -1.373}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2058370086334780722}
@@ -185,6 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d55450604acac244b68b4606d9bb2dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Spawner: {fileID: 2058370087691237352}
 --- !u!1 &2058370086766392236
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,12 +329,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 395ebffe21055b444aa08677a54c7d5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ObjectToSpawn: {fileID: 1792297676304307666, guid: 0d24162574ac91249a37c85ff29433bc,
+  m_ObjectToSpawn: {fileID: 7752689767802361543, guid: 80eafdf5def30e049bef2e1bca97b4a6,
     type: 3}
   m_StartPoint: {fileID: 2058370087951832530}
   m_DropPoint: {fileID: 2058370086453328394}
   m_EndPoint: {fileID: 2058370086144746315}
-  m_fFallSpeed: 10
+  m_fFallSpeed: 3
   m_fConveyorBeltSpeed: 60
 --- !u!1 &2058370087951832531
 GameObject:
@@ -359,7 +360,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2058370087951832531}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.295, y: 2.584, z: -0.856}
+  m_LocalPosition: {x: 1.172, y: 2.831, z: -1.262}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2058370086334780722}

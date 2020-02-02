@@ -74,7 +74,7 @@ public class Mover : MonoBehaviour
     {
         //StartCoroutine(BearDropper());
 
-        float distance = m_FallSpeed * Time.time;
+        float distance = m_FallSpeed + (Time.deltaTime * 10.0f);
         transform.position = Vector3.MoveTowards(transform.position, m_DropPoint.position, distance);
         // Check if the position of the cube and sphere are approximately equal.
         if (Vector3.Distance(transform.position, m_DropPoint.position) < 0.001f)
@@ -108,6 +108,7 @@ public class Mover : MonoBehaviour
             // Swap the position of the cylinder.
             m_IsMovingOnBelt = false;
             m_RigidBody.useGravity = true;
+            m_RigidBody.mass = 1.0f;
             m_RigidBody.AddRelativeForce((transform.forward + (transform.up * m_upAmount)) * m_ConveyorBeltSpeed * m_PushMultiplier * Random.Range(1.0f, m_maxForceMultiplier));
         }
     }
