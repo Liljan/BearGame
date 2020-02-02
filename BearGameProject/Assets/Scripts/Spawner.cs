@@ -16,11 +16,26 @@ public class Spawner : MonoBehaviour
     private List<GameObject> m_SpawnedObjects = new List<GameObject>();
     private List<GameObject> m_ObjectIDsOnBelt = new List<GameObject>();
 
+    private bool isGameplay = false;
+
     // Start is called before the first frame update
     void Start()
     {
-        //EventManager.StartListening("TimesUp", ClearObjects);
+        EventManager.StartListening("StartGame", StartGame);
+        EventManager.StartListening("GameOver", EndGame);
+        EventManager.StartListening("BearCompleted", SpawnObjects);
+        EventManager.StartListening("BearFailed", SpawnObjects);
         EventManager.StartListening("ResetGame", ClearObjects);
+    }
+
+    private void StartGame()
+    {
+        isGameplay = true;
+    }
+
+    private void EndGame()
+    {
+        isGameplay = false;
     }
 
     // Update is called once per frame
@@ -31,6 +46,9 @@ public class Spawner : MonoBehaviour
 
     public void SpawnObjects()
     {
+        if(!isGameplay)
+            return;
+
         GameObject spawnedObj = Instantiate(m_ObjectToSpawn, m_StartPoint.position, m_StartPoint.rotation);
         m_SpawnedObjects.Add(spawnedObj);
         m_ObjectIDsOnBelt.Add(spawnedObj);
@@ -73,6 +91,8 @@ public class Spawner : MonoBehaviour
         // Use the garbage collection
         m_SpawnedObjects.Clear();
         m_ObjectIDsOnBelt.Clear();
+
+        isGameplay = false;
     }
 
     public void RemoveBearFromBelt(GameObject obj)

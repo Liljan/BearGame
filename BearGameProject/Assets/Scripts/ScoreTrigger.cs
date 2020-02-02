@@ -39,6 +39,7 @@ public class ScoreTrigger : MonoBehaviour
         {
             EventManager.TriggerEvent("BearFailed");
         }
+
         bear.PassedGoal = true;
 
         // Hack. To reach the base of the object (the parent) the Bear hierarchy structure

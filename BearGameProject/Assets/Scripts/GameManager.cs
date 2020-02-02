@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
     public void GotoGameplayState()
     {
         EventManager.TriggerEvent("StartGame");
+        m_Spawner.SpawnObjects();
         // The game is playing
         // Then the timer calls the game to end.
     }
@@ -107,7 +108,7 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("The game is over... Restarting in 1 second");
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(2.0f);
 
         GotoGameOverState();
     }

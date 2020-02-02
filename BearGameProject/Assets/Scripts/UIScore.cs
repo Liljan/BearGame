@@ -19,7 +19,7 @@ public class UIScore : MonoBehaviour
         EventManager.StartListening("ResetGame", ResetScore);
 
         // Assign score UI text component to handle
-        m_ScoreText.text = "Score: " + m_CurrentScore.ToString();
+        m_ScoreText.text = m_CurrentScore.ToString();
     }
 
     // Update is called once per frame
@@ -30,12 +30,12 @@ public class UIScore : MonoBehaviour
     void CompletedBear()
     {
         m_CurrentScore += 1;
-        m_ScoreText.text = "Score: " + m_CurrentScore.ToString();
+        m_ScoreText.text = m_CurrentScore.ToString();
     }
 
     void ResetScore()
     {
         m_CurrentScore = 0;
-        m_ScoreText.text = "Score: " + m_CurrentScore.ToString();
+        m_ScoreText.text = m_CurrentScore.ToString();
     }
 }
