@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        EventManager.StartListening("CountdownComplete", GotoGameplayState);
         EventManager.StartListening("GameOver", GotoPostGameState);
 
         GotoPreGameState();
@@ -89,12 +90,7 @@ public class GameManager : MonoBehaviour
     {
         ResetGame();
 
-        yield return new WaitForSeconds(1.0f);
-        Debug.Log("Get ready...");
-        yield return new WaitForSeconds(1.0f);
-        Debug.Log("Go!");
-
-        GotoGameplayState();
+        yield return null;
     }
 
     IEnumerator PostGamePlayState()
