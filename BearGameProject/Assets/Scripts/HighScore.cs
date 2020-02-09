@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using System;
 
 public class HighScore : MonoBehaviour
 {
@@ -12,10 +14,17 @@ public class HighScore : MonoBehaviour
     private Transform _entryTemplate;
 
     private List<Transform> highScoreEntryTransformList;
-    
+
+    private UnityAction _endOfGameListener;
+
     void Awake()
     {
+        _endOfGameListener = new UnityAction(StoreNewEntryFromEvent);
         _entryTemplate.gameObject.SetActive(false);
+
+        //This should be removed in the real version of the script. It's only for testing.
+        PlayerPrefs.SetString("playerScore", "0");
+        PlayerPrefs.SetString("playerName", "ABC");
 
         string jsonString = PlayerPrefs.GetString("highScoreTable");
         HighScores highScores = JsonUtility.FromJson<HighScores>(jsonString);
@@ -49,10 +58,20 @@ public class HighScore : MonoBehaviour
 
     }
 
+    void OnEnable()
+    {
+        EventManager.StartListening("theEnd", _endOfGameListener);
+    }
+
+    void OnDisable()
+    {
+        EventManager.StopListening("theEnd", _endOfGameListener);
+    }
+
     private void CreateHighScoreEntryTransform(HighScoreEntry entry, Transform container, List<Transform> transformList)
     {
         float templateHeight = 30f;
-        
+
         Transform entryTransform = Instantiate(_entryTemplate, container);
         RectTransform entryRectTransform = entryTransform.GetComponent<RectTransform>();
         entryRectTransform.anchoredPosition = new Vector2(0, -templateHeight * transformList.Count);
@@ -80,6 +99,20 @@ public class HighScore : MonoBehaviour
         entryTransform.Find("player").GetComponent<Text>().text = name;
 
         transformList.Add(entryTransform);
+    }
+
+    private int? ConvertStringToInt(string intString)
+    {
+        int i = 0;
+        return (Int32.TryParse(intString, out i) ? i : (int?)null);
+    }
+
+    private void StoreNewEntryFromEvent()
+    {
+        string playerScore = PlayerPrefs.GetString("playerScore");
+        int prefScoreAsInt = ConvertStringToInt(playerScore).GetValueOrDefault();
+        string playerName = PlayerPrefs.GetString("playerName");
+        AddHighScoreEntry(prefScoreAsInt, playerName);
     }
 
     private void AddHighScoreEntry(int score, string name)
