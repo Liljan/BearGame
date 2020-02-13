@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class UITimer : MonoBehaviour
 {
+    public Transform m_timePiece;
     public int m_TotalTime;
 
     private float m_TimeLeft;
@@ -32,7 +33,7 @@ public class UITimer : MonoBehaviour
         {
             float percLeft = m_TimeLeft / m_TotalTime;
             float totalDegrees = percLeft * 360;
-            transform.localRotation = Quaternion.Euler(-totalDegrees, 0, 0);
+            m_timePiece.localRotation = Quaternion.Euler(-totalDegrees, 0, 0);
 
         } else
         {

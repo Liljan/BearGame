@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3323550299196180667}
   - component: {fileID: 4642598587828977037}
-  - component: {fileID: 5047230356431141374}
   m_Layer: 5
   m_Name: Gameplay UI Logic
   m_TagString: Untagged
@@ -49,21 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a3e6ac523b8fff4cb35ee1d662742f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ScoreText: {fileID: 5790520719098249166}
---- !u!114 &5047230356431141374
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1537002001546206987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63144784e2dc8495a893fbacb889c325, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_TimerText: {fileID: 0}
-  m_TotalTime: 11
+  m_ScoreMesh: {fileID: 0}
 --- !u!1 &1707385026356108646
 GameObject:
   m_ObjectHideFlags: 0

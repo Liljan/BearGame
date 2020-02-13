@@ -53,7 +53,7 @@ Material:
     - _DstBlend: 0
     - _MainTilier: -0.03
     - _Metalac: 1
-    - _Metalic: 0
+    - _Metalic: 1
     - _ReceivesSSR: 1
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
